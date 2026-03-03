@@ -296,7 +296,7 @@ async def estimate_reward_apr(client: ClobClient, condition_id: str, yes_token: 
         if not rewards_data:
             return 0.0
         daily_reward = float(rewards_data.get("rewardsPerDay", 0) or 0)
-        total_liquidity = float(rewards_data.get("totalLiquidity", 1) or 1)
+        total_liquidity = float(rewards_data.get("totalLiquidity", 0) or 0)
         if total_liquidity <= 0:
             return 0.0
         daily_rate = daily_reward / total_liquidity
@@ -685,10 +685,11 @@ class RiskGuard:
 # ─────────────────────────────────────────
 class PolymarketMMBot:
     def __init__(self):
-        if not PRIVATE_KEY:
+        pk = os.getenv("PRIVATE_KEY", "")
+        if not pk:
             log.error("PRIVATE_KEY not set in .env")
             sys.exit(1)
-        self.auth      = PolyAuth(PRIVATE_KEY)
+        self.auth      = PolyAuth(pk)
         self.client    = ClobClient(self.auth)
         self.positions: dict[str, MarketPosition] = {}
         self.risk      = RiskGuard()
